@@ -10,15 +10,15 @@ import { ColorPicker } from 'color-picker';
 })
 export class App {
   protected readonly title = signal('angular-color-picker');
-  color = '#2889e9';
-  originalColor = '#2889e9';
+  color = signal('#2889e9');
+  originalColor = signal('#2889e9');
 
   public onChangeColor(color: string | null) {
-    this.color = color || '#FFFFFF';
+    this.color.set(color || '#FFFFFF');
   }
 
   public saveColor() {
-    this.originalColor = this.color;
+    this.originalColor.set(this.color());
   }
 
   public async activateEyedropper() {
@@ -28,9 +28,9 @@ export class App {
     try {
       const eyeDropper = new (window as any).EyeDropper();
       const result = await eyeDropper.open();
-      this.color = result.sRGBHex;
+      this.color.set(result.sRGBHex);
     } catch {
-      // пользователь отменил выбор
+      // user cancelled
     }
   }
 }
