@@ -12,6 +12,7 @@ describe('ColorPicker', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ColorPicker);
+    fixture.componentRef.setInput('inColor', '#000000');
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
