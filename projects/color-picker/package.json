@@ -1,6 +1,6 @@
 {
   "name": "@sashaseverfam/angular-color-picker",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Angular color picker component with shade and saturation selection. Renders on Canvas, auto-scales and recalculates sizes on container resize.",
   "license": "MIT",
   "repository": {
