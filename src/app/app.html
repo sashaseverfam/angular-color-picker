@@ -3,21 +3,3 @@
   [inColor]="'#ff5733'"
   (changeModel)="onChangeColor($event)"
 />
-
-Без прозрачности
-<lib-color-picker
-  [inColor]="color"
-  [hasTransparent]="false"
-  [colorDefault]="'#ffffff'"
-  (changeModel)="onChangeColor($event)"
-/>
-
-С пипеткой
-<lib-color-picker
-  [inColor]="color"
-  [hasEyeDropper]="true"
-  [eyeColor]="originalColor"
-  (changeModel)="onChangeColor($event)"
-  (changeEnd)="saveColor()"
-  (startEye)="activateEyedropper()"
-/>
