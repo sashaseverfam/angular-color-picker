@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
+  effect,
+  input,
+  output,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ColorBoxComponent } from './components/color-box/color-box.component';
@@ -17,31 +16,31 @@ import { ColorBoxComponent } from './components/color-box/color-box.component';
   styleUrls: ['./color-picker.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ColorPicker implements OnChanges {
-  @Input() eyeColor?: string | null;
-  @Input() inColor!: string | null; // hex
-  @Input() hasTransparent = true;
-  @Input() hasEyeDropper = false;
-  @Input() colorDefault = '#000000';
+export class ColorPicker {
+  inColor = input.required<string | null>();
+  eyeColor = input<string | null>(null);
+  hasTransparent = input(true);
+  hasEyeDropper = input(false);
+  colorDefault = input('#000000');
 
-  @Output() changeModel: EventEmitter<string | null> = new EventEmitter<string | null>();
-  @Output() changeEnd: EventEmitter<void> = new EventEmitter<void>();
-  @Output() startEye: EventEmitter<Event> = new EventEmitter<Event>();
+  changeModel = output<string | null>();
+  changeEnd = output();
+  startEye = output<Event>();
 
-  currentColor: string | null = this.inColor;
+  currentColor = signal<string | null>(null);
+
+  constructor() {
+    effect(() => {
+      this.currentColor.set(this.inColor());
+    });
+  }
 
   get defaultColor(): string | null {
-    return this.hasTransparent ? null : this.colorDefault;
+    return this.hasTransparent() ? null : this.colorDefault();
   }
 
   get isTransparent(): boolean {
-    return !this.currentColor && this.hasTransparent;
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['inColor']) {
-      this.currentColor = this.inColor;
-    }
+    return !this.currentColor() && this.hasTransparent();
   }
 
   changeInput(event: Event) {
@@ -50,12 +49,12 @@ export class ColorPicker implements OnChanges {
   }
 
   changeColor(color: string) {
-    this.currentColor = color;
+    this.currentColor.set(color);
     this.changeModel.emit(color);
   }
 
   selectColor(color: string | null) {
-    this.currentColor = color || this.defaultColor;
+    this.currentColor.set(color || this.defaultColor);
     this.changeModel.emit(color);
     this.changeEnd.emit();
   }

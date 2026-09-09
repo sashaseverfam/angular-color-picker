@@ -6,14 +6,11 @@ import {
   ChangeDetectorRef,
   Component,
   DOCUMENT,
+  effect,
   ElementRef,
-  EventEmitter,
   inject,
-  Input,
-  OnChanges,
-  OnDestroy,
-  Output,
-  SimpleChanges,
+  input,
+  output,
   ViewChild,
 } from '@angular/core';
 import { debounceTime, fromEvent, Subscription } from 'rxjs';
@@ -36,7 +33,7 @@ import { isTouchEvent } from '../../utils/touch-events.utils';
   providers: [...WINDOW_PROVIDERS, ColorBoxCanvasService],
   standalone: true,
 })
-export class ColorBoxComponent implements OnDestroy, OnChanges {
+export class ColorBoxComponent {
   private readonly convertService = inject(ColorBoxConvertService);
   private readonly canvasService = inject(ColorBoxCanvasService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -44,10 +41,10 @@ export class ColorBoxComponent implements OnDestroy, OnChanges {
   private readonly window = inject(WINDOW);
   private readonly document = inject(DOCUMENT);
 
-  @Input() inputColorPicker = '#fff';
+  inputColorPicker = input('#fff');
 
-  @Output() changeColor = new EventEmitter<string>();
-  @Output() selectColor = new EventEmitter<string>();
+  changeColor = output<string>();
+  selectColor = output<string>();
 
   @ViewChild('spectrumCursor', { static: false, read: ElementRef })
   spectrumCursor?: ElementRef;
@@ -79,6 +76,16 @@ export class ColorBoxComponent implements OnDestroy, OnChanges {
     afterNextRender(() => {
       this.init();
     });
+
+    effect(() => {
+      const color = this.inputColorPicker();
+      if (color && color !== this.changeHex) {
+        this.changeHex = color;
+        const hsl = this.convertService.hexToHsl(this.changeHex);
+        this.hue = hsl.h;
+        this.colorToPosition(color);
+      }
+    });
   }
 
   private init(): void {
@@ -89,7 +96,7 @@ export class ColorBoxComponent implements OnDestroy, OnChanges {
 
     this.createRectangleSpectrumListeners(spectrumCanvasElement);
     this.createHueSpectrumListeners(hueCanvasElement);
-    this.colorToPosition(this.inputColorPicker);
+    this.colorToPosition(this.inputColorPicker());
 
     this.subs = fromEvent(this.window, 'resize')
       .pipe(debounceTime(300))
@@ -101,15 +108,6 @@ export class ColorBoxComponent implements OnDestroy, OnChanges {
 
   ngOnDestroy() {
     this._subs.forEach((s) => s.unsubscribe());
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['inputColorPicker'] && this.inputColorPicker !== this.changeHex) {
-      this.changeHex = this.inputColorPicker;
-      const hsl = this.convertService.hexToHsl(this.changeHex);
-      this.hue = hsl.h;
-      this.colorToPosition(this.inputColorPicker);
-    }
   }
 
   private refreshColorPickerBox(): void {
