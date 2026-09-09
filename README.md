@@ -5,7 +5,7 @@ Angular color picker component with shade and saturation selection. Renders on C
 ## Installation
 
 ```bash
-npm install @sashaseverfam/angular-color-picker
+npm install @severfam/angular-color-picker
 ```
 
 ## Requirements
@@ -21,7 +21,7 @@ Standalone component — import directly in your component's `imports`:
 
 ```typescript
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { ColorPicker } from '@sashaseverfam/angular-color-picker';
+import { ColorPicker } from '@severfam/angular-color-picker';
 
 @Component({
   selector: 'app-root',
