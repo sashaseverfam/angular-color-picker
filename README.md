@@ -1,59 +1,121 @@
-# AngularColorPicker
+# Angular Color Picker
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.23.
+Angular-компонент палитры цветов с выбором оттенка и насыщенности. Рендерится на Canvas, автоматически масштабируется и пересчитывает размеры при изменении контейнера.
 
-## Development server
-
-To start a local development server, run:
+## Установка
 
 ```bash
-ng serve
+npm install @sashaseverfam/angular-color-picker
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Требования
 
-## Code scaffolding
+- Angular 21.2+
+- Используется `OnPush` change detection
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Использование
 
-```bash
-ng generate component component-name
+### 1. Импорт
+
+Компонент standalone, импортируйте напрямую в `imports` вашего компонента:
+
+```typescript
+import { Component } from '@angular/core';
+import { ColorPicker } from '@sashaseverfam/angular-color-picker';
+
+@Component({
+  selector: 'app-root',
+  imports: [ColorPicker],
+  template: `
+    <lib-color-picker
+      [inColor]="color"
+      (changeModel)="onColorChange($event)"
+    />
+  `,
+})
+export class AppComponent {
+  color = '#2889e9';
+
+  onColorChange(color: string | null) {
+    this.color = color;
+  }
+}
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## API
 
-```bash
-ng generate --help
+### Inputs
+
+| Input | Тип | Дефолт | Описание |
+|-------|-----|--------|----------|
+| `inColor` | `string \| null` | — | Текущий цвет (hex). Поддерживает `#RGB` и `#RRGGBB`. |
+| `colorDefault` | `string` | `'#000000'` | Цвет по умолчанию, если `hasTransparent = false` и цвет не выбран. |
+| `hasTransparent` | `boolean` | `true` | Показывать ли кнопку «без цвета» (прозрачный). |
+| `hasEyeDropper` | `boolean` | `false` | Показывать ли иконку пипетки. |
+| `eyeColor` | `string \| null` | — | Цвет для превью пипетки (отдельно от выбранного). |
+
+### Outputs
+
+| Output | Тип | Описание |
+|--------|-----|----------|
+| `changeModel` | `string \| null` | Эмитится при каждом изменении цвета (ввод в поле, выбор на палитре). |
+| `changeEnd` | `void` | Эмитится при завершении выбора (отпускание кнопки мыши / пальца). |
+| `startEye` | `Event` | Эмитится при клике на иконку пипетки. |
+
+### Селектор
+
+```html
+<lib-color-picker></lib-color-picker>
 ```
 
-## Building
+## Примеры
 
-To build the project run:
+### Базовый
 
-```bash
-ng build
+```html
+<lib-color-picker
+  [inColor]="'#ff5733'"
+  (changeModel)="onColorChange($event)"
+/>
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### Без прозрачности
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+```html
+<lib-color-picker
+  [inColor]="color"
+  [hasTransparent]="false"
+  [colorDefault]="'#ffffff'"
+  (changeModel)="onColorChange($event)"
+/>
 ```
 
-## Running end-to-end tests
+### С пипеткой
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+```html
+<lib-color-picker
+  [inColor]="color"
+  [hasEyeDropper]="true"
+  [eyeColor]="originalColor"
+  (changeModel)="onColorChange($event)"
+  (changeEnd)="saveColor()"
+  (startEye)="activateEyedropper()"
+/>
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Стили
 
-## Additional Resources
+Компонент использует SCSS. Базовые стили подключаются автоматически через `styleUrls`.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Для кастомизации переопределите CSS-переменные или стили через `::ng-deep`:
+
+```scss
+lib-color-picker {
+  --color-box-border: #eaeaea;
+  --color-box-radius: 3px;
+}
+```
+
+## Лицензия
+
+MIT
