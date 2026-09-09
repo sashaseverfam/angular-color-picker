@@ -20,24 +20,21 @@ npm install @sashaseverfam/angular-color-picker
 Компонент standalone, импортируйте напрямую в `imports` вашего компонента:
 
 ```typescript
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ColorPicker } from '@sashaseverfam/angular-color-picker';
 
 @Component({
   selector: 'app-root',
   imports: [ColorPicker],
-  template: `
-    <lib-color-picker
-      [inColor]="color"
-      (changeModel)="onColorChange($event)"
-    />
-  `,
+  templateUrl: './app.html',
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  color = '#2889e9';
+  color = signal('#2889e9');
 
   onColorChange(color: string | null) {
-    this.color = color;
+    this.color.set(color);
   }
 }
 ```
