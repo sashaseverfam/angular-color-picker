@@ -1,23 +1,23 @@
 # Angular Color Picker
 
-Angular-компонент палитры цветов с выбором оттенка и насыщенности. Рендерится на Canvas, автоматически масштабируется и пересчитывает размеры при изменении контейнера.
+Angular color picker component with shade and saturation selection. Renders on Canvas, auto-scales and recalculates sizes on container resize.
 
-## Установка
+## Installation
 
 ```bash
 npm install @sashaseverfam/angular-color-picker
 ```
 
-## Требования
+## Requirements
 
 - Angular 21.2+
-- Используется `OnPush` change detection
+- Uses `OnPush` change detection
 
-## Использование
+## Usage
 
-### 1. Импорт
+### 1. Import
 
-Компонент standalone, импортируйте напрямую в `imports` вашего компонента:
+Standalone component — import directly in your component's `imports`:
 
 ```typescript
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
@@ -39,35 +39,42 @@ export class AppComponent {
 }
 ```
 
+```html
+<lib-color-picker
+  [inColor]="color()"
+  (changeModel)="onColorChange($event)"
+/>
+```
+
 ## API
 
 ### Inputs
 
-| Input | Тип | Дефолт | Описание |
-|-------|-----|--------|----------|
-| `inColor` | `string \| null` | — | Текущий цвет (hex). Поддерживает `#RGB` и `#RRGGBB`. |
-| `colorDefault` | `string` | `'#000000'` | Цвет по умолчанию, если `hasTransparent = false` и цвет не выбран. |
-| `hasTransparent` | `boolean` | `true` | Показывать ли кнопку «без цвета» (прозрачный). |
-| `hasEyeDropper` | `boolean` | `false` | Показывать ли иконку пипетки. |
-| `eyeColor` | `string \| null` | — | Цвет для превью пипетки (отдельно от выбранного). |
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `inColor` | `string \| null` | **required** | Current color (hex). Supports `#RGB` and `#RRGGBB`. |
+| `colorDefault` | `string` | `'#000000'` | Default color when `hasTransparent = false` and no color is selected. |
+| `hasTransparent` | `boolean` | `true` | Show "no color" (transparent) button. |
+| `hasEyeDropper` | `boolean` | `false` | Show eyedropper icon. |
+| `eyeColor` | `string \| null` | — | Color for eyedropper preview (separate from selected color). |
 
 ### Outputs
 
-| Output | Тип | Описание |
-|--------|-----|----------|
-| `changeModel` | `string \| null` | Эмитится при каждом изменении цвета (ввод в поле, выбор на палитре). |
-| `changeEnd` | `void` | Эмитится при завершении выбора (отпускание кнопки мыши / пальца). |
-| `startEye` | `Event` | Эмитится при клике на иконку пипетки. |
+| Output | Type | Description |
+|--------|------|-------------|
+| `changeModel` | `string \| null` | Emits on every color change (input field, palette selection). |
+| `changeEnd` | `void` | Emits when selection ends (mouse/touch release). |
+| `startEye` | `Event` | Emits on eyedropper icon click. |
 
-### Селектор
+### Selector
 
 ```html
 <lib-color-picker></lib-color-picker>
 ```
 
-## Примеры
+## Examples
 
-### Базовый
+### Basic
 
 ```html
 <lib-color-picker
@@ -76,35 +83,35 @@ export class AppComponent {
 />
 ```
 
-### Без прозрачности
+### Without transparency
 
 ```html
 <lib-color-picker
-  [inColor]="color"
+  [inColor]="color()"
   [hasTransparent]="false"
   [colorDefault]="'#ffffff'"
   (changeModel)="onColorChange($event)"
 />
 ```
 
-### С пипеткой
+### With eyedropper
 
 ```html
 <lib-color-picker
-  [inColor]="color"
+  [inColor]="color()"
   [hasEyeDropper]="true"
-  [eyeColor]="originalColor"
+  [eyeColor]="originalColor()"
   (changeModel)="onColorChange($event)"
   (changeEnd)="saveColor()"
   (startEye)="activateEyedropper()"
 />
 ```
 
-## Стили
+## Styles
 
-Компонент использует SCSS. Базовые стили подключаются автоматически через `styleUrls`.
+Component uses SCSS. Base styles are included automatically via `styleUrls`.
 
-Для кастомизации переопределите CSS-переменные или стили через `::ng-deep`:
+To customize, override CSS variables or styles via `::ng-deep`:
 
 ```scss
 lib-color-picker {
@@ -113,6 +120,6 @@ lib-color-picker {
 }
 ```
 
-## Лицензия
+## License
 
 MIT
