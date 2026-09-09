@@ -1,0 +1,186 @@
+
+.color-box {
+  font-family: Open Sans;
+  &__wrapperline {
+    display: flex;
+    width: 100%;
+  }
+
+  &__wrapper-usecolors {
+    /*@include mq($until: desktop) {
+      display: none;
+    }*/
+
+    &--background-fill {
+      display: block;
+    }
+
+    &--stroke {
+      display: block;
+    }
+  }
+
+  &__transparent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+    height: 37px;
+    margin-right: 4px;
+    width: 37px;
+
+    &:hover {
+      background-color: #f6f6f6;
+    }
+  }
+
+  &__wrapper {
+    border: 1px solid #eaeaea;
+    border-radius: 3px;
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+
+    &-withtransparent {
+      width: calc(100% - 42px);
+    }
+  }
+
+  &__info {
+    align-items: center;
+    display: flex;
+  }
+
+  &__picker {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    margin-right: 4px;
+
+    &:hover {
+      background-color: #f6f6f6;
+    }
+  }
+
+  &__preview {
+    border-right: 1px solid #e5e5e5;
+    height: 36px;
+    width: 40%;
+
+    &--transparent {
+      background-color: #fff;
+      background-image:
+        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc),
+        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc);
+      background-size: 8px 8px;
+      background-position: 0 0, 4px 4px;
+    }
+  }
+
+  &__form-element {
+    width: 60%;
+  }
+
+  &__input {
+    border: 0;
+    border-bottom: 1px solid #e5e5e5;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    height: 36px;
+    text-align: center;
+    text-transform: uppercase;
+    width: 100%;
+    &:focus {
+      outline: 0;
+    }
+    &-trasparent {
+      text-transform: none;
+    }
+  }
+
+  &__usecolors {
+
+    &-title {
+      font-size: 13px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      margin: 15px 0;
+
+      &--modal {
+        font-size: 13px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        margin: 0 0 15px 0;
+      }
+    }
+
+    &-wrapper {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      /*@include  mq ($from: wide) {
+        max-height: 106px;
+        width: 320px;
+        overflow: auto;
+      }*/
+
+      /*@include mq ($from: desktop, $until: wide) {
+        max-height: 106px;
+        width: 220px;
+        overflow: auto;
+      }*/
+
+      /*@include mq ($until: desktop) {
+        max-height: 40px;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }*/
+
+      &--background-fill {
+        /*@include mq ($until: desktop) {
+          max-height:unset;
+          overflow: unset;
+        }*/
+      }
+
+      &--stroke {
+        max-height: 106px;
+        overflow: auto;
+        /*@include mq ($from: wide) {
+          width: 290px;
+        }*/
+      }
+
+    }
+
+    &-color {
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      border-radius: 3px;
+      cursor: pointer;
+      height: 32px;
+      width: 32px;
+      min-width: 32px;
+      min-height: 32px;
+    }
+  }
+}
+
+// панель настроек
+:host-context(.actions-form),
+:host-context(.actions-forms),
+:host-context(.actions-forms-block) {
+  .design-color-box-wrapper {
+    /*@include mq($until: desktop) {
+      display: none;
+    }*/
+  }
+}

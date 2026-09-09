@@ -1,0 +1,18 @@
+{
+  "name": "@sashaseverfam/angular-color-picker",
+  "version": "0.0.1",
+  "description": "Color picker component for Angular with transparency support, eye dropper, and customizable color palette",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sashaseverfam/angular-color-picker.git"
+  },
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}
