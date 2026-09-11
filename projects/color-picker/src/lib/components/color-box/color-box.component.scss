@@ -1,89 +1,86 @@
-
-.panel {
+:host {
   display: block;
-  padding-bottom: 20px;
+  height: 100%;
+}
 
-  .spectrum-map {
+.colorbox {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &__spectrum {
     border-radius: 3px;
     cursor: pointer;
-    height: 120px;
-    margin-bottom: 15px;
+    flex: 1;
+    min-height: 60px;
     overflow: hidden;
     position: relative;
     width: 100%;
-
-    .color-spectrum-cursor {
-      background: transparent;
-      border: 2px solid #fff;
-      border-radius: 100%;
-      box-sizing: border-box;
-      height: 20px;
-      margin-left: -10px;
-      margin-top: -10px;
-      box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.4);
-      padding: 0;
-      pointer-events: none;
-      position: absolute;
-      width: 20px;
-      z-index: 2;
-    }
-
-    #spectrum-canvas {
-      background: #ccc;
-      bottom: 0;
-      height: 100%;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      width: 100%;
-    }
   }
 
-  .hue-map {
+  &__spectrum-cursor {
+    background: transparent;
+    border: 2px solid #fff;
+    border-radius: 100%;
+    box-sizing: border-box;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
+    box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.4);
+    padding: 0;
+    pointer-events: none;
+    position: absolute;
+    width: 20px;
+    z-index: 2;
+  }
+
+  #spectrum-canvas {
+    background: #ccc;
+    bottom: 0;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  &__hue-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__hue {
     cursor: pointer;
     height: 10px;
     position: relative;
-
     width: 100%;
+  }
 
-    &-wrapper {
-      /*@include mq ($until: desktop) {
-        display: flex;
-        flex-direction: column;
-      }
+  &__hue-cursor {
+    background: transparent;
+    border: 2px solid #fff;
+    border-radius: 100%;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.4);
+    height: 20px;
+    margin-left: -10px;
+    padding: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0px;
+    width: 20px;
+    z-index: 2;
+  }
 
-      .content-fill-opacity:not(:empty)  {
-        padding-top: 5px;
-        @include mq ($until: desktop) {
-          padding-top: 25px;
-        }
-      }*/
-    }
+  #hue-canvas {
+    background: #ccc;
+    border-radius: 8px;
+    height: 100%;
+    width: 100%;
+  }
 
-    .color-hue-cursor {
-      background: transparent;
-      border: 2px solid #fff;
-      border-radius: 100%;
-      box-sizing: border-box;
-      box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.4);
-      height: 20px;
-      margin-left: -10px;
-      padding: 0;
-      pointer-events: none;
-      position: absolute;
-      top: 0px;
-      width: 20px;
-      z-index: 2;
-    }
-
-    #hue-canvas {
-      background: #ccc;
-      border-radius: 8px;
-
-      height: 100%;
-
-      width: 100%;
-    }
+  &__content {
+    min-height: 0;
   }
 }

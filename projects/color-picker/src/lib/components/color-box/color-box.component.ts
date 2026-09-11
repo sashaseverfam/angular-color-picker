@@ -111,12 +111,30 @@ export class ColorBoxComponent {
   }
 
   private refreshColorPickerBox(): void {
+    const spectrumCanvasElement = this.spectrumCanvas?.nativeElement;
+    const hueCanvasElement = this.hueCanvas?.nativeElement;
+
+    if (spectrumCanvasElement) {
+      const curWidth = getValueStyle(spectrumCanvasElement, 'width');
+      const curHeight = getValueStyle(spectrumCanvasElement, 'height');
+      spectrumCanvasElement.width = curWidth;
+      spectrumCanvasElement.height = curHeight;
+    }
+
+    if (hueCanvasElement) {
+      const curWidth = getValueStyle(hueCanvasElement, 'width');
+      const curHeight = getValueStyle(hueCanvasElement, 'height');
+      hueCanvasElement.width = curWidth;
+      hueCanvasElement.height = curHeight;
+    }
+
     const hsl = this.convertService.hexToHsl(this.changeHex);
     this.hue = hsl.h;
     this.canvasService.createRectangleSpectrum(
       this.getHueColor(this.hue),
-      this.spectrumCanvas?.nativeElement,
+      spectrumCanvasElement,
     );
+    this.canvasService.createHueSpectrum(hueCanvasElement);
     this.refreshPositionCursors();
   }
 

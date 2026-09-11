@@ -1,20 +1,20 @@
-<div class="color-box">
-  <div class="design-color-box-wrapper">
+<div class="colorpicker">
+  <div class="colorpicker__design-wrapper">
     <ng-container *ngTemplateOutlet="colorMapTemplate"></ng-container>
   </div>
 
-  <div class="color-box__info">
+  <div class="colorpicker__info">
     @if (hasEyeDropper()) {
-      <div class="color-box__picker" (click)="startEye.emit($event)">
+      <div class="colorpicker__picker" (click)="startEye.emit($event)">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M20.4227 4.27425L19.7257 3.57734C18.9559 2.80755 17.7079 2.80755 16.9381 3.57734L12.7565 7.75881L12.0596 7.0619C11.6747 6.677 11.0507 6.677 10.6658 7.0619C10.2809 7.44679 10.2809 8.07083 10.6658 8.45572L11.3626 9.15255L4.39341 16.1217C4.5402 17.3687 4.0452 19.2573 3 20.3027L3.69654 21C4.74192 19.9546 6.63098 19.4596 7.87801 19.6062L14.8472 12.6371L15.5442 13.3341C15.9291 13.719 16.5532 13.719 16.9381 13.3341C17.323 12.9492 17.323 12.3252 16.9381 11.9403L16.2411 11.2434L20.4227 7.0619C21.1924 6.29211 21.1924 5.04404 20.4227 4.27425ZM12.0595 9.84946L14.1503 11.9402L7.49458 18.5958C6.82993 18.5871 6.10446 18.7017 5.41883 18.915C5.24707 18.9685 5.07418 19.0292 4.90213 19.0976C4.97048 18.9256 5.03126 18.7527 5.0847 18.5809C5.29805 17.8953 5.41264 17.1698 5.40386 16.5051L12.0595 9.84946Z" fill="#3D3D3D"/>
         </svg>
       </div>
     }
-    <div class="color-box__wrapperline">
+    <div class="colorpicker__wrapperline">
       @if (hasTransparent()) {
         <div
-          class="color-box__transparent"
+          class="colorpicker__transparent"
           (click)="selectColor(null)"
         >
           <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32">
@@ -23,29 +23,29 @@
         </div>
       }
       <div
-        class="color-box__wrapper"
-        [class.color-box__wrapper-withtransparent]="hasTransparent()"
+        class="colorpicker__wrapper"
+        [class.colorpicker__wrapper--with-transparent]="hasTransparent()"
       >
         @if (eyeColor() || currentColor(); as color) {
           <div
-            class="color-box__preview"
+            class="colorpicker__preview"
             [style.background]="color"
           ></div>
         }
         @if (isTransparent) {
           <div
-            class="color-box__preview color-box__preview--transparent"
+            class="colorpicker__preview colorpicker__preview--transparent"
           ></div>
         }
-        <div class="color-box__form-element">
+        <div class="colorpicker__form-element">
           <input
             type="text"
             [value]="
               currentColor() ||
               (hasTransparent() ? 'Без цвета' : colorDefault())
             "
-            class="color-box__input"
-            [class.color-box__input-trasparent]="isTransparent"
+            class="colorpicker__input"
+            [class.colorpicker__input--transparent]="isTransparent"
             [attr.readonly]="isTransparent || null"
             (change)="changeInput($event)"
             pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
@@ -66,4 +66,3 @@
     <ng-content></ng-content>
   </color-box>
 </ng-template>
-

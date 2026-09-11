@@ -1,18 +1,18 @@
-<div class="panel">
-  <div class="spectrum-map">
+<div class="colorbox">
+  <div class="colorbox__spectrum">
     <button
       id="spectrum-cursor"
-      class="color-spectrum-cursor"
+      class="colorbox__spectrum-cursor"
       #spectrumCursor
     ></button>
     <canvas id="spectrum-canvas" #spectrumCanvas></canvas>
   </div>
-  <div class="hue-map-wrapper">
-    <div class="hue-map">
-      <button id="hue-cursor" class="color-hue-cursor" #hueCursor></button>
+  <div class="colorbox__hue-wrapper">
+    <div class="colorbox__hue">
+      <button id="hue-cursor" class="colorbox__hue-cursor" #hueCursor></button>
       <canvas id="hue-canvas" #hueCanvas></canvas>
     </div>
-    <div class="content-fill-opacity">
+    <div class="colorbox__content">
       <ng-content></ng-content>
     </div>
   </div>

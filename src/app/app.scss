@@ -1,0 +1,39 @@
+:host {
+  display: block;
+  padding: 20px;
+}
+
+.resizable {
+  position: relative;
+  width: 260px;
+  height: 220px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  overflow: hidden;
+  resize: none;
+}
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    135deg,
+    transparent 50%,
+    #999 50%,
+    #999 60%,
+    transparent 60%,
+    transparent 70%,
+    #999 70%,
+    #999 80%,
+    transparent 80%,
+    transparent 90%,
+    #999 90%,
+    #999 100%,
+    transparent 100%
+  );
+}

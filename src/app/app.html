@@ -1,5 +1,8 @@
-Basic
-<lib-color-picker
-  [inColor]="color()"
-  (changeModel)="onChangeColor($event)"
-/>
+Resizable container
+<div class="resizable" #resizableContainer>
+  <div class="resize-handle" #resizeHandle></div>
+  <lib-color-picker
+    [inColor]="color()"
+    (changeModel)="onChangeColor($event)"
+  />
+</div>
