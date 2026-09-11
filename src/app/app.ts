@@ -18,8 +18,8 @@ import { ColorPicker } from 'color-picker';
 })
 export class App implements AfterViewInit, OnDestroy {
   protected readonly title = signal('angular-color-picker');
-  color = signal('#2889e9');
-  originalColor = signal('#2889e9');
+  color = signal<string | null>('#2889e9');
+  originalColor = signal<string | null>('#2889e9');
 
   @ViewChild('resizableContainer') resizableContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('resizeHandle') resizeHandle!: ElementRef<HTMLDivElement>;
@@ -75,7 +75,7 @@ export class App implements AfterViewInit, OnDestroy {
   };
 
   public onChangeColor(color: string | null) {
-    this.color.set(color || '#FFFFFF');
+    this.color.set(color);
   }
 
   public saveColor() {

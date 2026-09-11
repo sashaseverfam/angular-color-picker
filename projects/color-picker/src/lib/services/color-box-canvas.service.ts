@@ -14,7 +14,7 @@ export class ColorBoxCanvasService {
     return this._hueCanvas?.getBoundingClientRect() ?? new DOMRect();
   }
 
-  _widthSpectrum: number | null = null;
+  private _widthSpectrum: number | null = null;
   get widthSpectrum(): number | null {
     return this._widthSpectrum;
   }
@@ -22,15 +22,15 @@ export class ColorBoxCanvasService {
     this._widthSpectrum = value;
   }
 
-  _heigthSpectrum: number | null = null;
-  get heigthSpectrum(): number | null {
-    return this._heigthSpectrum;
+  private _heightSpectrum: number | null = null;
+  get heightSpectrum(): number | null {
+    return this._heightSpectrum;
   }
-  set heigthSpectrum(value: number | null) {
-    this._heigthSpectrum = value;
+  set heightSpectrum(value: number | null) {
+    this._heightSpectrum = value;
   }
 
-  public init(spectrumCanvas: HTMLCanvasElement, hueCanvas: HTMLCanvasElement) {
+  public init(spectrumCanvas: HTMLCanvasElement, hueCanvas: HTMLCanvasElement): void {
     this._spectrumCanvas = spectrumCanvas;
     this._hueCanvas = hueCanvas;
 
@@ -45,9 +45,9 @@ export class ColorBoxCanvasService {
     this._hueCanvas.height = hueHeight;
 
     this._widthSpectrum = spectrumWidth;
-    this._heigthSpectrum = spectrumHeight;
+    this._heightSpectrum = spectrumHeight;
 
-    this.createRectangleSpectrum('red', this._spectrumCanvas);
+    this.createRectangleSpectrum('hsl(0 100% 50%)', this._spectrumCanvas);
     this.createHueSpectrum(this._hueCanvas);
   }
 

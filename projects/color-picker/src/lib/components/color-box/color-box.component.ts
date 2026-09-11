@@ -5,6 +5,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   DOCUMENT,
   effect,
   ElementRef,
@@ -13,7 +14,8 @@ import {
   output,
   ViewChild,
 } from '@angular/core';
-import { debounceTime, fromEvent, Subscription } from 'rxjs';
+import { debounceTime, fromEvent } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   getEventRectCoords,
   getValueStyle,
@@ -23,7 +25,6 @@ import {
 } from '../../utils/color-box.util';
 import { WINDOW, WINDOW_PROVIDERS } from '../../providers/window.providers';
 import { isTouchEvent } from '../../utils/touch-events.utils';
-
 
 @Component({
   selector: 'color-box',
@@ -62,15 +63,17 @@ export class ColorBoxComponent {
   saturation = 1;
   lightness = 0.5;
 
-  red: unknown;
-  green: unknown;
-  blue: unknown;
-  hex!: string;
+  red = 0;
+  green = 0;
+  blue = 0;
+  hex = '';
 
-  private _subs: Subscription[] = [];
-  set subs(sub: Subscription) {
-    this._subs.push(sub);
-  }
+  private readonly destroyRef = inject(DestroyRef);
+
+  private _activeDocListeners: Array<{
+    type: string;
+    handler: EventListener;
+  }> = [];
 
   constructor() {
     afterNextRender(() => {
@@ -88,6 +91,10 @@ export class ColorBoxComponent {
     });
   }
 
+  ngOnDestroy(): void {
+    this.removeDocumentListeners();
+  }
+
   private init(): void {
     const spectrumCanvasElement = this.spectrumCanvas?.nativeElement;
     const hueCanvasElement = this.hueCanvas?.nativeElement;
@@ -98,16 +105,12 @@ export class ColorBoxComponent {
     this.createHueSpectrumListeners(hueCanvasElement);
     this.colorToPosition(this.inputColorPicker());
 
-    this.subs = fromEvent(this.window, 'resize')
-      .pipe(debounceTime(300))
+    fromEvent(this.window, 'resize')
+      .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.refreshColorPickerBox();
         this.cdr.detectChanges();
       });
-  }
-
-  ngOnDestroy() {
-    this._subs.forEach((s) => s.unsubscribe());
   }
 
   private refreshColorPickerBox(): void {
@@ -138,116 +141,99 @@ export class ColorBoxComponent {
     this.refreshPositionCursors();
   }
 
-  private refreshPositionCursors() {
+  private refreshPositionCursors(): void {
     const spectrumCanvasElement = this.spectrumCanvas?.nativeElement;
     const curWidth = getValueStyle(spectrumCanvasElement, 'width');
     const curHeight = getValueStyle(spectrumCanvasElement, 'height');
     const initWidth = this.canvasService.widthSpectrum;
-    const initHeight = this.canvasService.heigthSpectrum;
+    const initHeight = this.canvasService.heightSpectrum;
 
     if (curWidth !== initWidth || curHeight !== initHeight) {
       this.colorToPosition(this.changeHex);
       this.canvasService.widthSpectrum = curWidth;
-      this.canvasService.heigthSpectrum = curHeight;
+      this.canvasService.heightSpectrum = curHeight;
     }
   }
 
-  private createRectangleSpectrumListeners(canvas: HTMLCanvasElement) {
-    const getSpectrumColor = (e: MouseEvent | TouchEvent) => {
+  private createRectangleSpectrumListeners(canvas: HTMLCanvasElement): void {
+    const handler = (e: MouseEvent | TouchEvent) => {
       e.preventDefault();
 
-      const spectrumRect = this.canvasService.spectrumRect;
-      const { x, y } = getEventRectCoords(e, spectrumRect);
-      const xRatio = (x / spectrumRect.width) * 100;
-      const yRatio = (y / spectrumRect.height) * 100;
+      const rect = this.canvasService.spectrumRect;
+      const { x, y } = getEventRectCoords(e, rect);
+      const xRatio = (x / rect.width) * 100;
+      const yRatio = (y / rect.height) * 100;
       const hsvValue = 1 - yRatio / 100;
       const hsvSaturation = xRatio / 100;
 
-      this.lightness = (hsvValue / 2) * (2 - hsvSaturation);
+      this.lightness = Math.max(0, Math.min(1,
+        (hsvValue / 2) * (2 - hsvSaturation)
+      ));
 
-      const saturationDevider = 1 - Math.abs(2 * this.lightness - 1);
-      this.saturation =
-        saturationDevider === 0 ? 0 : (hsvValue * hsvSaturation) / saturationDevider;
-
-      const color = `hsl ${this.hue} ${this.saturation} ${this.lightness}`;
+      const saturationDivider = 1 - Math.abs(2 * this.lightness - 1);
+      this.saturation = Math.max(0, Math.min(1,
+        saturationDivider === 0 ? 0 : (hsvValue * hsvSaturation) / saturationDivider
+      ));
 
       this.updateSpectrumCursor(x, y);
-      this.setColorValues(color);
-
-      if (isStartEvent(e)) {
-        this.changeColorEmit(this.hex);
-      }
-
-      if (isMoveEvent(e)) {
-        this.changeColorEmit(this.hex);
-      }
-
-      if (isEndEvent(e)) {
-        this.changeColorEmit(this.hex);
-        this.selectColor.emit(this.hex);
-      }
+      this.emitColor(e);
     };
 
     canvas.addEventListener('mousedown', (e: MouseEvent) => {
-      this.eventHandler(e, getSpectrumColor);
+      this.eventHandler(e, handler);
     });
 
     canvas.addEventListener('touchstart', (e: TouchEvent) => {
-      this.eventHandler(e, getSpectrumColor);
+      this.eventHandler(e, handler);
     });
   }
 
-  private createHueSpectrumListeners(canvas: HTMLCanvasElement) {
-    const getHueColor = (e: MouseEvent | TouchEvent) => {
+  private createHueSpectrumListeners(canvas: HTMLCanvasElement): void {
+    const handler = (e: MouseEvent | TouchEvent) => {
       e.preventDefault();
 
-      const hueRect = this.canvasService.hueRect;
-      const { x } = getEventRectCoords(e, hueRect);
+      const rect = this.canvasService.hueRect;
+      const { x } = getEventRectCoords(e, rect);
 
-      const percent = x / hueRect.width;
-      this.hue = 360 * percent;
+      const percent = rect.width > 0 ? x / rect.width : 0;
+      this.hue = Math.max(0, Math.min(360, 360 * percent));
 
       const hueColor = `hsl(${this.hue} 100% 50%)`;
-      const color = `hsl(
-        ${this.hue}
-        ${this.saturation * 100}%
-        ${this.lightness * 100}%
-      )`;
-
       this.canvasService.createRectangleSpectrum(hueColor, this.spectrumCanvas?.nativeElement);
 
       this.updateHueCursor(x);
-      this.setColorValues(color);
-
-      if (isStartEvent(e)) {
-        this.changeColorEmit(this.hex);
-      }
-
-      if (isMoveEvent(e)) {
-        this.changeColorEmit(this.hex);
-      }
-
-      if (isEndEvent(e)) {
-        this.changeColorEmit(this.hex);
-        this.selectColor.emit(this.hex);
-      }
+      this.emitColor(e);
     };
 
-    canvas.addEventListener('mousedown', (e: MouseEvent | TouchEvent) => {
-      this.eventHandler(e, getHueColor);
+    canvas.addEventListener('mousedown', (e: MouseEvent) => {
+      this.eventHandler(e, handler);
     });
 
     canvas.addEventListener('touchstart', (e: TouchEvent) => {
-      this.eventHandler(e, getHueColor);
+      this.eventHandler(e, handler);
     });
   }
 
-  changeColorEmit(hex: string) {
+  private emitColor(e: MouseEvent | TouchEvent): void {
+    const color = `hsl(${this.hue} ${this.saturation * 100}% ${this.lightness * 100}%)`;
+    this.setColorValues(color);
+
+    if (isStartEvent(e) || isMoveEvent(e)) {
+      this.changeColorEmit(this.hex);
+    }
+
+    if (isEndEvent(e)) {
+      this.changeColorEmit(this.hex);
+      this.selectColor.emit(this.hex);
+    }
+  }
+
+  changeColorEmit(hex: string): void {
     this.changeHex = hex;
     this.changeColor.emit(this.hex);
   }
 
-  private setColorValues(color: string) {
+  private setColorValues(color: string): void {
     this.currentColor = color;
 
     const [red, green, blue] = this.convertService.hslToRgb(
@@ -264,18 +250,18 @@ export class ColorBoxComponent {
 
   private updateSpectrumCursor(x: number, y: number): void {
     if (this.spectrumCursor) {
-      this.spectrumCursor.nativeElement.style.left = x + 'px';
-      this.spectrumCursor.nativeElement.style.top = y + 'px';
+      this.spectrumCursor.nativeElement.style.left = `${x}px`;
+      this.spectrumCursor.nativeElement.style.top = `${y}px`;
     }
   }
 
   private updateHueCursor(x: number): void {
     if (this.hueCursor) {
-      this.hueCursor.nativeElement.style.left = x + 'px';
+      this.hueCursor.nativeElement.style.left = `${x}px`;
     }
   }
 
-  private colorToPosition(hexColor: string) {
+  private colorToPosition(hexColor: string): void {
     const spectrumRect = this.canvasService.spectrumRect;
     const hueRect = this.canvasService.hueRect;
 
@@ -303,7 +289,7 @@ export class ColorBoxComponent {
   private eventHandler(
     e: MouseEvent | TouchEvent,
     handler: (event: MouseEvent | TouchEvent) => void,
-  ) {
+  ): void {
     handler(e);
 
     if (!this.window || !this.document) {
@@ -311,27 +297,35 @@ export class ColorBoxComponent {
     }
 
     if (e instanceof MouseEvent) {
-      this.document.addEventListener('mousemove', handler);
-
-      const mouseUpEvent = (e: MouseEvent) => {
-        handler(e);
-        this.document.removeEventListener('mousemove', handler);
-        this.document.removeEventListener('mouseup', mouseUpEvent);
-      };
-      this.document.addEventListener('mouseup', mouseUpEvent);
+      this.addDocumentListener('mousemove', handler as EventListener);
+      this.addDocumentListener('mouseup', ((upEvent: MouseEvent) => {
+        handler(upEvent);
+        this.removeDocumentListeners();
+      }) as EventListener);
     }
 
     if (isTouchEvent(e)) {
-      this.document.addEventListener('touchmove', handler);
-
-      const touchUpEvent = (e: TouchEvent) => {
-        handler(e);
-        this.document.removeEventListener('touchmove', handler);
-        this.document.removeEventListener('touchend', touchUpEvent);
-        this.document.removeEventListener('touchcancel', touchUpEvent);
-      };
-      this.document.addEventListener('touchend', touchUpEvent);
-      this.document.addEventListener('touchcancel', touchUpEvent);
+      this.addDocumentListener('touchmove', handler as EventListener);
+      this.addDocumentListener('touchend', ((upEvent: TouchEvent) => {
+        handler(upEvent);
+        this.removeDocumentListeners();
+      }) as EventListener);
+      this.addDocumentListener('touchcancel', ((upEvent: TouchEvent) => {
+        handler(upEvent);
+        this.removeDocumentListeners();
+      }) as EventListener);
     }
+  }
+
+  private addDocumentListener(type: string, handler: EventListener): void {
+    this.document.addEventListener(type, handler);
+    this._activeDocListeners.push({ type, handler });
+  }
+
+  private removeDocumentListeners(): void {
+    for (const { type, handler } of this._activeDocListeners) {
+      this.document.removeEventListener(type, handler);
+    }
+    this._activeDocListeners = [];
   }
 }

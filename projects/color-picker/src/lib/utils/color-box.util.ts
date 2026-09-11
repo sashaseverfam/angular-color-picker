@@ -12,26 +12,13 @@ export function getEventRectCoords(
     y = e.pageY - top;
   }
 
-  if (isTouchEvent(e)) {
+  if (isTouchEvent(e) && e.changedTouches.length > 0) {
     x = e.changedTouches[0].pageX - left;
     y = e.changedTouches[0].pageY - top;
   }
 
-  if (x > width) {
-    x = width;
-  }
-
-  if (x < 0) {
-    x = 0;
-  }
-
-  if (y > height) {
-    y = height;
-  }
-
-  if (y < 0) {
-    y = 0.1;
-  }
+  x = Math.max(0, Math.min(width, x));
+  y = Math.max(0, Math.min(height, y));
 
   return { x, y };
 }
@@ -41,41 +28,20 @@ export function getValueStyle(
   parameter: 'width' | 'height' | 'left' | 'top'
 ): number {
   const computedStyle = getComputedStyle(element);
-  let value;
-  if (parameter === 'width') {
-    value = (computedStyle.getPropertyValue(parameter) || '0px').match(/\d+/);
-  }
-
-  if (parameter === 'height') {
-    value = (computedStyle.getPropertyValue(parameter) || '0px').match(/\d+/);
-  }
-
-  if (parameter === 'left') {
-    value = (computedStyle.getPropertyValue(parameter) || '0px').match(/\d+/);
-  }
-
-  if (parameter === 'top') {
-    value = (computedStyle.getPropertyValue(parameter) || '0px').match(/\d+/);
-  }
-
-  const val = value || [];
-  let result = 0;
-  if (val[0]) {
-    result = +val[0];
-  }
-
-  return result || 0;
+  const raw = computedStyle.getPropertyValue(parameter) || '0px';
+  const match = raw.match(/\d+/);
+  return match && match[0] ? +match[0] : 0;
 }
 
-export function isStartEvent(e: Event) {
+export function isStartEvent(e: Event): boolean {
   return e.type === 'mousedown' || e.type === 'touchstart';
 }
 
-export function isMoveEvent(e: Event) {
+export function isMoveEvent(e: Event): boolean {
   return e.type === 'mousemove' || e.type === 'touchmove';
 }
 
-export function isEndEvent(e: Event) {
+export function isEndEvent(e: Event): boolean {
   return (
     e.type === 'mouseup' || e.type === 'touchend' || e.type === 'touchcancel'
   );

@@ -5,18 +5,15 @@ import { Injectable } from '@angular/core';
 })
 export class ColorBoxConvertService {
   /**
-   * Converts an HSL color value to RGB. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-   * Assumes h, s, and l are contained in the set [0, 1] and
-   * returns r, g, and b in the set [0, 255].
-   *
-   * @param   {number}  h       The hue
-   * @param   {number}  s       The saturation
-   * @param   {number}  l       The lightness
-   * @return  {Array}           The RGB representation
+   * Converts an HSL color value to RGB.
+   * h in [0, 360], s in [0, 1], l in [0, 1].
+   * Returns [r, g, b] in [0, 255].
    */
+  public hslToRgb(h: number, s: number, l: number): [number, number, number] {
+    h = ((h % 360) + 360) % 360;
+    s = Math.max(0, Math.min(1, s));
+    l = Math.max(0, Math.min(1, l));
 
-  public hslToRgb(h: number, s: number, l: number) {
     const k = (n: number) => (n + h / 30) % 12;
     const a = s * Math.min(l, 1 - l);
     const f = (n: number) =>
@@ -28,15 +25,21 @@ export class ColorBoxConvertService {
     ];
   }
 
-  public hslToHex(h: number, s: number, l: number) {
-    let r, g, b;
+  /**
+   * Converts HSL to hex string.
+   * h in [0, 1], s in [0, 1], l in [0, 1].
+   */
+  public hslToHex(h: number, s: number, l: number): string {
+    h = Math.max(0, Math.min(1, h));
+    s = Math.max(0, Math.min(1, s));
+    l = Math.max(0, Math.min(1, l));
 
-    if (isNaN(s)) {
-      s = 0;
-    }
+    let r: number;
+    let g: number;
+    let b: number;
 
     if (s === 0) {
-      r = g = b = l; // achromatic
+      r = g = b = l;
     } else {
       const hue2rgb = (p: number, q: number, t: number) => {
         if (t < 0) t += 1;
@@ -52,6 +55,7 @@ export class ColorBoxConvertService {
       g = hue2rgb(p, q, h);
       b = hue2rgb(p, q, h - 1 / 3);
     }
+
     const toHex = (x: number) => {
       const hex = Math.round(x * 255).toString(16);
       return hex.length === 1 ? '0' + hex : hex;
@@ -59,80 +63,117 @@ export class ColorBoxConvertService {
 
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   }
-  //H = #000fff
-  public hexToHsl(H: string) {
-    if (H === undefined) {
-      H = '#000000';
+
+  /**
+   * Converts hex string to HSL.
+   * Returns { h: [0,360], s: [0,100], l: [0,100] }.
+   */
+  public hexToHsl(H: string): { h: number; s: number; l: number } {
+    if (!H || typeof H !== 'string') {
+      return { h: 0, s: 0, l: 0 };
     }
-    let r: any;
-    let g: any;
-    let b: any;
-    if (H.length === 4) {
-      r = '0x' + H[1] + H[1];
-      g = '0x' + H[2] + H[2];
-      b = '0x' + H[3] + H[3];
-    } else if (H.length === 7) {
-      r = '0x' + H[1] + H[2];
-      g = '0x' + H[3] + H[4];
-      b = '0x' + H[5] + H[6];
+
+    const hex = H.startsWith('#') ? H : `#${H}`;
+
+    let r: number;
+    let g: number;
+    let b: number;
+
+    if (hex.length === 4) {
+      r = parseInt(hex[1] + hex[1], 16);
+      g = parseInt(hex[2] + hex[2], 16);
+      b = parseInt(hex[3] + hex[3], 16);
+    } else if (hex.length === 7) {
+      r = parseInt(hex.substring(1, 3), 16);
+      g = parseInt(hex.substring(3, 5), 16);
+      b = parseInt(hex.substring(5, 7), 16);
+    } else {
+      return { h: 0, s: 0, l: 0 };
     }
-    // Then to HSL
-    r /= 255;
-    g /= 255;
-    b /= 255;
+
+    if (isNaN(r!) || isNaN(g!) || isNaN(b!)) {
+      return { h: 0, s: 0, l: 0 };
+    }
+
+    r = r! / 255;
+    g = g! / 255;
+    b = b! / 255;
+
     const cmin = Math.min(r, g, b);
     const cmax = Math.max(r, g, b);
     const delta = cmax - cmin;
+
     let h = 0;
     let s = 0;
     let l = 0;
 
-    if (delta === 0) h = 0;
-    else if (cmax === r) h = ((g - b) / delta) % 6;
-    else if (cmax === g) h = (b - r) / delta + 2;
-    else h = (r - g) / delta + 4;
-
-    h = Math.round(h * 60);
-
-    if (h < 0) h += 360;
-
     l = (cmax + cmin) / 2;
-    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-    s = +(s * 100).toFixed(1);
-    l = +(l * 100).toFixed(1);
+
+    if (delta === 0) {
+      h = 0;
+      s = 0;
+    } else {
+      s = l > 0.5 ? delta / (2 - cmax - cmin) : delta / (cmax + cmin);
+
+      if (cmax === r) h = ((g - b) / delta) % 6;
+      else if (cmax === g) h = (b - r) / delta + 2;
+      else h = (r - g) / delta + 4;
+
+      h = Math.round(h * 60);
+      if (h < 0) h += 360;
+    }
+
+    s = Math.round(s * 100);
+    l = Math.round(l * 100);
+
     return { h, s, l };
   }
 
-  private hexToRGB(hex = '') {
-    const red = parseInt(hex.substring(1, 3), 16);
-    const green = parseInt(hex.substring(3, 5), 16);
-    const blue = parseInt(hex.substring(5, 7), 16);
-
-    return [red, green, blue];
-  }
-
-  public hexToHsv(hex: string) {
+  /**
+   * Converts hex string to HSV.
+   * Returns [h: [0,360], s: [0,1], v: [0,1]].
+   */
+  public hexToHsv(hex: string): [number, number, number] {
     const rgb = this.hexToRGB(hex);
-    const result = this.rgbToHsv(rgb);
-    return result;
+    return this.rgbToHsv(rgb);
   }
 
-  private rgbToHsv([r, g, b]: number[]) {
-    (r /= 255), (g /= 255), (b /= 255);
+  private hexToRGB(hex: string): [number, number, number] {
+    if (!hex || typeof hex !== 'string') {
+      return [0, 0, 0];
+    }
+
+    const h = hex.startsWith('#') ? hex : `#${hex}`;
+
+    if (h.length !== 7) {
+      return [0, 0, 0];
+    }
+
+    const r = parseInt(h.substring(1, 3), 16);
+    const g = parseInt(h.substring(3, 5), 16);
+    const b = parseInt(h.substring(5, 7), 16);
+
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+      return [0, 0, 0];
+    }
+
+    return [r, g, b];
+  }
+
+  private rgbToHsv([r, g, b]: number[]): [number, number, number] {
+    r /= 255;
+    g /= 255;
+    b /= 255;
 
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
-    let h = 0;
-    let s = 0;
-    const v = max;
-
     const d = max - min;
 
-    s = max == 0 ? 0 : d / max;
+    let h = 0;
+    const s = max === 0 ? 0 : d / max;
+    const v = max;
 
-    if (max == min) {
-      h = 0; // achromatic
-    } else {
+    if (d !== 0) {
       switch (max) {
         case r:
           h = (g - b) / d + (g < b ? 6 : 0);
@@ -144,7 +185,6 @@ export class ColorBoxConvertService {
           h = (r - g) / d + 4;
           break;
       }
-
       h /= 6;
     }
 
